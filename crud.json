@@ -1,0 +1,115 @@
+
+
+// hands_on One 
+use schoolDB
+
+db.teachers.insertMany([
+    {teachers_id:"T001", name:"Joy", age:"27",track:"web"},
+    {teachers_id:"T002", name:"Mary", age:"25",track:"data science"},
+    {teachers_id:"T003", name:"Tommy", age:"30",track:"Devops"},
+    {teachers_id:"T004", name:"James", age:"29",track: "python"},
+    {teachers_id:"T005", name:"Tabby", age:"35",track:"AI"}
+])
+
+// hands_on two:Enhance students with Embedded contacts
+ db.teachers.updateMany({}, {
+    $set:{
+        contact:{email:"user@example.com", phone:"0122113616"},
+        emergency:{name:"parent",relation:"mother", phone:"07564916293"}
+    }
+ })
+
+//  hands-on three: Courses & mentors with refrencing
+db.mentors.insertMany([
+    { mentor_id:"M001", name:"Mr. Kasongo", speciality:"Wantam"},
+     { mentor_id:"M002", name:"Mr. WiggyG", speciality:"Truthful"},
+      { mentor_id:"M003", name:"Mr. Olang", speciality:"AI"},
+       { mentor_id:"M004", name:"Mrs. Dudi", speciality:"Software development"},
+        { mentor_id:"M005", name:"Mr. Kikuyo", speciality:"Devops"}
+
+])
+db.courses.insertMany([
+    {course_id:"C101", title:"Lyingtology", duration_weeks: 5, mentor_id:"M001"},
+    {course_id:"C102", title:"Poet", duration_weeks: 7, mentor_id:"M002"},
+    {course_id:"C103", title:"AI for beginners", duration_weeks: 9, mentor_id:"M003"},
+    {course_id:"C104", title:"Software development", duration_weeks: 7, mentor_id:"M004"},
+    {course_id:"C105", title:" Devops",duration_weeks: 10, mentor_id:"M005"},
+])
+
+// hands on  four: Connect everything  together with enrollments(Analytics)
+
+db.enrollments.insertMany([
+    { student_id:"S001", course_id:"C001", status:"in_progress",score:88},
+    { student_id:"S002", course_id:"C002", status:"completed",score:92},
+    { student_id:"S003", course_id:"C003", status:"in_progress",score:70},
+    { student_id:"S004", course_id:"C004", status:"in_progress",score:20},
+    { student_id:"S005", course_id:"C005", status:"completed",score:85}
+
+])
+// aggregation : students per course
+
+db.enrollments.aggregate([
+    {$group:{_id: "$course_id",  total_students: {$sum: 1}} }
+])
+
+// aggregate:average score per course_id
+
+db.enrollments.aggregate([
+    {$group: {_id:"$course_id",avg_score: {$avg: "$score"}}}
+])
+// aggregate : teachers per track
+db.teachers.aggregate([
+    {$group:{_id: "$track", total_students:{$sum: 1}}}
+])
+// aggregate :teachers per age
+db.teachers. aggregate([
+    { $group:{_id: "$track",avg_age:{$avg:"$age"}}}
+])
+//  aggregate: total enrollments per course
+db.enrollments.aggregate([
+    {$group:{_id:"$course_id", total_enrollments:{$sum:1}}}
+])
+// aggregate: total enrollments per course with course details
+db.enrollments.aggregate([
+    {
+        $lookup: {
+            from: "courses",
+            localField: "course_id",
+            foreignField: "course_id",
+            as: "course_details"
+        }
+    },
+    {
+        $unwind: "$course_details"
+    },
+    {
+        $group: {
+            _id: "$course_details.title",
+            total_enrollments: {$sum: 1}
+        }
+    }
+])
+// aggregate: all courses with a specific mentor
+db.courses.aggregate([
+    {
+        $lookup: {
+            from: "mentors",
+            localField: "mentor_id",
+            foreignField: "mentor_id",
+            as: "mentor_details"
+        }
+    },
+    {
+        $unwind: "$mentor_details"
+    },
+    {
+        $match: { "mentor_details.name": "Mr. Kasongo" }
+    },
+    {
+        $project: {
+            title: 1,
+            duration_weeks: 1,
+            mentor_name: "$mentor_details.name"
+        }
+    }
+])

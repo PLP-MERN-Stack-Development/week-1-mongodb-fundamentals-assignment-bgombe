@@ -67,4 +67,8 @@ Learn the fundamentals of MongoDB, including installation, creating collections,
    - A screenshot of your MongoDB Compass or Atlas showing your collections and sample data
 4. Commit and push your changes to GitHub
 5. Your submission will be automatically graded based on the criteria in the autograding configuration
-6. The instructor will review your submission after the autograding is complete 
+6. The instructor will review your submission after the autograding is complete
+
+db.books.find(
+  { in_stock: true, published_year: { $gt: 2010 } }
+)

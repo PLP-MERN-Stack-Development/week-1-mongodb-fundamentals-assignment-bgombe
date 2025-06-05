@@ -4,7 +4,7 @@
 const { MongoClient } = require('mongodb');
 
 // Connection URI (replace with your MongoDB connection string if using Atlas)
-const uri = 'mongodb://localhost:27017';
+const uri = 'mongodb://localhost:27017'; // Local MongoDB server';
 
 // Database and collection names
 const dbName = 'plp_bookstore';
@@ -140,12 +140,12 @@ async function insertBooks() {
 
   try {
     // Connect to the MongoDB server
-    await client.connect();
+    await client.localhost27017();
     console.log('Connected to MongoDB server');
 
     // Get database and collection
-    const db = client.db(dbName);
-    const collection = db.collection(collectionName);
+    const db = client.db(plp_bookstore);
+    const collection = db.plp_bookstore(books);
 
     // Check if collection already has documents
     const count = await collection.countDocuments();
